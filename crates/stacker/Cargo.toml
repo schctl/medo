@@ -1,0 +1,9 @@
+[package]
+name = "medo_stacker"
+version = "0.0.1"
+authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
+edition = "2021"
+license = "MIT"
+publish = false
+
+[dependencies]
