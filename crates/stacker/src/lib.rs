@@ -1,4 +1,4 @@
 pub mod error;
-mod homography;
+pub mod homography;
 
 pub use error::*;

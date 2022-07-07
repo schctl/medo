@@ -10,26 +10,25 @@ pub mod orb;
 use enum_dispatch::enum_dispatch;
 use opencv::core::Mat;
 
+use crate::Result;
+
 /// The method for calculating the homography matrix of two images.
 #[derive(Debug, Clone, Copy, Hash)]
 pub enum Method {
     /// Calculation based on the [ORB] keypoint detection algorithm.
     ///
-    /// Calculates the homography matrix by computing the distances between keypoints (image features)
-    /// of two images. This method is generally faster than [ECC](Self::Ecc), but less precise.
-    ///
-    /// [orb]: https://en.wikipedia.org/wiki/Oriented_FAST_and_rotated_BRIEF
+    /// [orb]: self::orb::Calculator
     Orb,
     /// Calculation based on the [ECC] image alignment algorithm.
     ///
-    /// [ecc]: https://sites.google.com/site/georgeevangelidis/ecc
+    /// [ecc]: self::ecc::Calculator
     Ecc,
 }
 
 /// Represents an implementor of a homography calculator.
 #[enum_dispatch]
 pub trait Calculate {
-    fn calculate(&mut self, src: Mat) -> Mat;
+    fn calculate(&mut self, src: &Mat) -> Result<Mat>;
 }
 
 /// Abstraction over different calculator types.
@@ -37,4 +36,13 @@ pub trait Calculate {
 pub enum Calculator {
     Orb(orb::Calculator),
     Ecc(ecc::Calculator),
+}
+
+impl Calculator {
+    pub fn new(dst: &Mat, method: Method) -> Result<Self> {
+        match method {
+            Method::Orb => Ok(Self::Orb(orb::Calculator::new(dst)?)),
+            Method::Ecc => todo!(),
+        }
+    }
 }
