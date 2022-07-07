@@ -42,7 +42,7 @@ impl Calculator {
     pub fn new(dst: &Mat, method: Method) -> Result<Self> {
         match method {
             Method::Orb => Ok(Self::Orb(orb::Calculator::new(dst)?)),
-            Method::Ecc => todo!(),
+            Method::Ecc => Ok(Self::Ecc(ecc::Calculator::new(dst)?)),
         }
     }
 }
