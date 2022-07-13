@@ -3,6 +3,7 @@
 use opencv::core::{Mat, Point, Point2f, Vector};
 use opencv::imgproc;
 
+use crate::contour::Contour;
 use crate::Result;
 
 /// Get the area of a circle.
@@ -28,7 +29,7 @@ impl Default for StarDetectionOpts {
 }
 
 /// Check if a contour resembles a star.
-pub fn is_contour_a_star(cnt: &Vector<Point>, opts: StarDetectionOpts) -> Result<bool> {
+pub fn is_contour_a_star(cnt: &Contour, opts: StarDetectionOpts) -> Result<bool> {
     let area = imgproc::contour_area(&cnt, false)? as f32;
 
     // Reject if contour is too large
@@ -70,7 +71,10 @@ impl Default for StarContourDetectionOpts {
 }
 
 /// Find all star contours from an image.
-pub fn find_contours(img: &Mat, opts: StarContourDetectionOpts) -> Result<Vector<Vector<Point>>> {
+pub fn find_contours(
+    img: &Mat,
+    opts: StarContourDetectionOpts,
+) -> Result<impl Iterator<Item = Contour>> {
     // Convert image to grayscale, blur and threshold
     let mut img_gray = Mat::default();
     imgproc::cvt_color(&img, &mut img_gray, imgproc::COLOR_BGR2GRAY, 0)?;
@@ -86,7 +90,7 @@ pub fn find_contours(img: &Mat, opts: StarContourDetectionOpts) -> Result<Vector
     )?;
 
     // Find contours
-    let mut contours: Vector<Vector<Point>> = Vector::new();
+    let mut contours: Vector<Contour> = Vector::new();
     imgproc::find_contours(
         &img_thresh,
         &mut contours,
@@ -95,12 +99,9 @@ pub fn find_contours(img: &Mat, opts: StarContourDetectionOpts) -> Result<Vector
         Point::default(),
     )?;
 
-    Ok(contours
-        .into_iter()
-        .filter_map(|s| {
-            is_contour_a_star(&s, opts.star_detection)
-                .ok()
-                .and_then(|o| o.then(|| s))
-        })
-        .collect())
+    Ok(contours.into_iter().filter_map(move |s| {
+        is_contour_a_star(&s, opts.star_detection)
+            .ok()
+            .and_then(|o| o.then(|| s))
+    }))
 }

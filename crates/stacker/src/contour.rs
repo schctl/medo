@@ -5,8 +5,10 @@ use opencv::imgproc;
 
 use crate::Result;
 
+pub type Contour = Vector<Point>;
+
 /// Create an image mask from the given contours.
-pub fn create_mask(size: Size, ty: i32, contours: &Vector<Vector<Point>>) -> Result<Mat> {
+pub fn create_mask(size: Size, ty: i32, contours: &Vector<Contour>) -> Result<Mat> {
     let mut mask = Mat::new_size_with_default(size, ty, Scalar::new(0.0, 0.0, 0.0, 0.0))?;
 
     for i in 0..contours.len() {
