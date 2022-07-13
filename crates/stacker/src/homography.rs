@@ -1,12 +1,18 @@
-//! [ECC](Self::Calculator) based homography calculator.
+//! Tools to find the relation between projections of an image.
+//!
+//! A **homography** is a mapping between two planar projections of an image. A **homography matrix**
+//! is a transformation that describes the homography between images. This module provides tools
+//! to compute the homography matrix of an image based on a target image.
 
 use opencv::core::{Mat, TermCriteria};
 use opencv::imgproc;
 use opencv::video;
 
-use super::Calculate;
 use crate::Result;
 
+/// [ECC] based homography calculator.
+///
+/// [ecc]: https://sites.google.com/site/georgeevangelidis/ecc
 pub struct Calculator {
     dst: Mat,
 }
@@ -17,15 +23,11 @@ impl Calculator {
         imgproc::cvt_color(&dst, &mut dst_gray, imgproc::COLOR_BGR2GRAY, 0)?;
         Ok(Self { dst: dst_gray })
     }
-}
 
-impl Calculate for Calculator {
-    fn calculate(&mut self, src: &Mat) -> Result<Mat> {
+    pub fn calculate(&mut self, src: &Mat) -> Result<Mat> {
         // Convert image to grayscale
         let mut src_gray = Mat::default();
         imgproc::cvt_color(src, &mut src_gray, imgproc::COLOR_BGR2GRAY, 0)?;
-
-        // Find warp matrix
 
         // Define the termination criteria
         let criteria = TermCriteria {
@@ -35,6 +37,7 @@ impl Calculate for Calculator {
             epsilon: 1e-10,
         };
 
+        // Calculate warp matrix
         let mut homography = Mat::default();
         video::find_transform_ecc(
             &src_gray,

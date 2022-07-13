@@ -7,6 +7,5 @@ license = "MIT"
 publish = false
 
 [dependencies]
-enum_dispatch = "0.3"
 opencv = "0.65"
 thiserror = "1"
