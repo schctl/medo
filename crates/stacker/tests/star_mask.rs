@@ -29,7 +29,7 @@ fn create_mask() {
     .unwrap();
 
     // Find contours and create mask
-    let contours = star::find_contours(&image).unwrap();
+    let contours = star::find_contours(&image, Default::default()).unwrap();
     let mask = contour::create_mask(image.size().unwrap(), image.typ(), &contours).unwrap();
 
     // Write result

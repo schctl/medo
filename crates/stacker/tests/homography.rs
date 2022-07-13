@@ -5,7 +5,7 @@ use opencv::imgcodecs;
 use opencv::imgproc;
 use opencv::prelude::_InputArrayTraitConst;
 
-use medo_stacker::homography::Calculator;
+use medo_stacker::homography;
 
 fn relative<P: AsRef<Path>>(path: P) -> String {
     format!("{}/{}", env!("CARGO_MANIFEST_DIR"), path.as_ref().display())
@@ -31,8 +31,8 @@ fn warp_with_homography() {
     .unwrap();
 
     // Calculate homography
-    let mut calculator = Calculator::new(&template).unwrap();
-    let homography = calculator.calculate(&image).unwrap();
+    let calculator = homography::Calculator::new(&template).unwrap();
+    let homography = calculator.calculate(&image, Default::default()).unwrap();
 
     // Warp image using homography
     let mut dst = Mat::default();
@@ -48,10 +48,5 @@ fn warp_with_homography() {
     .unwrap();
 
     // Write result
-    imgcodecs::imwrite(
-        &relative_target(format!("ecc.jpg")),
-        &dst,
-        &Vector::new(),
-    )
-    .unwrap();
+    imgcodecs::imwrite(&relative_target(format!("ecc.jpg")), &dst, &Vector::new()).unwrap();
 }

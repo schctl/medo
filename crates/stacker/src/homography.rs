@@ -10,6 +10,19 @@ use opencv::video;
 
 use crate::Result;
 
+/// Homography calculation options.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CalculateOpts {
+    /// Number of iterations of the algorithm.
+    pub iterations: usize,
+}
+
+impl Default for CalculateOpts {
+    fn default() -> Self {
+        Self { iterations: 200 }
+    }
+}
+
 /// [ECC] based homography calculator.
 ///
 /// [ecc]: https://sites.google.com/site/georgeevangelidis/ecc
@@ -18,13 +31,18 @@ pub struct Calculator {
 }
 
 impl Calculator {
+    /// Create a new calculator.
+    ///
+    /// # Parameters
+    /// - `dst`: The source image from which the homography matrix will be calculated.
     pub fn new(dst: &Mat) -> Result<Self> {
         let mut dst_gray = Mat::default();
         imgproc::cvt_color(&dst, &mut dst_gray, imgproc::COLOR_BGR2GRAY, 0)?;
         Ok(Self { dst: dst_gray })
     }
 
-    pub fn calculate(&mut self, src: &Mat) -> Result<Mat> {
+    /// Calculate the homography of an image relative to the image associated with this calculator.
+    pub fn calculate(&self, src: &Mat, opts: CalculateOpts) -> Result<Mat> {
         // Convert image to grayscale
         let mut src_gray = Mat::default();
         imgproc::cvt_color(src, &mut src_gray, imgproc::COLOR_BGR2GRAY, 0)?;
@@ -33,8 +51,8 @@ impl Calculator {
         let criteria = TermCriteria {
             typ: opencv::core::TermCriteria_Type::COUNT as i32
                 | opencv::core::TermCriteria_Type::EPS as i32,
-            max_count: 100,
-            epsilon: 1e-10,
+            max_count: opts.iterations as i32,
+            epsilon: -1.0,
         };
 
         // Calculate warp matrix
