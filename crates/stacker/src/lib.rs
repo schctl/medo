@@ -1,3 +1,5 @@
+//! Image stacking library focused on astronomical images.
+
 pub mod error;
 pub mod homography;
 
