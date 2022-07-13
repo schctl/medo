@@ -20,7 +20,7 @@ fn relative_target<P: AsRef<Path>>(path: P) -> String {
 }
 
 #[test]
-fn warp_with_homography() {
+fn find_homography_and_warp() {
     // Read test images
     let image =
         imgcodecs::imread(&relative("tests/data/image.jpg"), imgcodecs::IMREAD_COLOR).unwrap();
@@ -48,5 +48,5 @@ fn warp_with_homography() {
     .unwrap();
 
     // Write result
-    imgcodecs::imwrite(&relative_target(format!("ecc.jpg")), &dst, &Vector::new()).unwrap();
+    imgcodecs::imwrite(&relative_target("ecc.jpg"), &dst, &Vector::new()).unwrap();
 }

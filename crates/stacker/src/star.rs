@@ -12,14 +12,14 @@ fn area_of_circle(radius: f32) -> f32 {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct StarDetectionOpts {
+pub struct DetectionOpts {
     /// Maximum area that can be filled by a star.
     pub max_area: f32,
     /// Maximum difference in shape from a perfect circle that a star can appear as (percent from [0, 1]).
     pub max_eccentricity: f32,
 }
 
-impl Default for StarDetectionOpts {
+impl Default for DetectionOpts {
     fn default() -> Self {
         Self {
             max_area: 2500.0,
@@ -29,7 +29,7 @@ impl Default for StarDetectionOpts {
 }
 
 /// Check if a contour resembles a star.
-pub fn is_contour_a_star(cnt: &Contour, opts: StarDetectionOpts) -> Result<bool> {
+pub fn is_contour_a_star(cnt: &Contour, opts: DetectionOpts) -> Result<bool> {
     let area = imgproc::contour_area(&cnt, false)? as f32;
 
     // Reject if contour is too large
@@ -51,16 +51,16 @@ pub fn is_contour_a_star(cnt: &Contour, opts: StarDetectionOpts) -> Result<bool>
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct StarContourDetectionOpts {
+pub struct ContourDetectionOpts {
     /// Star detections options.
-    star_detection: StarDetectionOpts,
+    star_detection: DetectionOpts,
     /// Threshold brightness.
     threshold_brightness: f32,
     /// Maximum brightness.
     max_brightness: f32,
 }
 
-impl Default for StarContourDetectionOpts {
+impl Default for ContourDetectionOpts {
     fn default() -> Self {
         Self {
             star_detection: Default::default(),
@@ -73,7 +73,7 @@ impl Default for StarContourDetectionOpts {
 /// Find all star contours from an image.
 pub fn find_contours(
     img: &Mat,
-    opts: StarContourDetectionOpts,
+    opts: ContourDetectionOpts,
 ) -> Result<impl Iterator<Item = Contour>> {
     // Convert image to grayscale, blur and threshold
     let mut img_gray = Mat::default();

@@ -20,7 +20,7 @@ fn relative_target<P: AsRef<Path>>(path: P) -> String {
 }
 
 #[test]
-fn create_mask() {
+fn create_star_mask() {
     // Read test image
     let image = imgcodecs::imread(
         &relative("tests/data/template.jpg"),
@@ -35,10 +35,5 @@ fn create_mask() {
     let mask = contour::create_mask(image.size().unwrap(), image.typ(), &contours).unwrap();
 
     // Write result
-    imgcodecs::imwrite(
-        &relative_target(format!("star_mask.jpg")),
-        &mask,
-        &Vector::new(),
-    )
-    .unwrap();
+    imgcodecs::imwrite(&relative_target("star_mask.jpg"), &mask, &Vector::new()).unwrap();
 }
