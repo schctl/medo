@@ -11,7 +11,6 @@ opencv = "0.66"
 medo_stacker = { path = "../" }
 
 [dev-dependencies]
-rayon = "1"
 criterion = "0.3"
 
 # Benchmarks

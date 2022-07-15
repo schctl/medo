@@ -322,6 +322,7 @@ name = "medo"
 version = "0.0.1"
 dependencies = [
  "medo_stacker",
+ "opencv",
 ]
 
 [[package]]
@@ -339,7 +340,6 @@ dependencies = [
  "criterion",
  "medo_stacker",
  "opencv",
- "rayon",
 ]
 
 [[package]]

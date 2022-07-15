@@ -13,3 +13,4 @@ license = "MIT"
 
 [dependencies]
 medo_stacker = { path = "crates/stacker" }
+opencv = "0.66"
