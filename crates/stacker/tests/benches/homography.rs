@@ -1,7 +1,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use medo_stacker::homography;
 
-mod common;
+use medo_stacker::homography;
+use medo_stacker_tests::common;
 
 pub fn basic_homography(c: &mut Criterion) {
     // Read test images

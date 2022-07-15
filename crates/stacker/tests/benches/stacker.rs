@@ -1,7 +1,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use medo_stacker::stacker::{average};
 
-mod common;
+use medo_stacker::stacker::average;
+use medo_stacker_tests::common;
 
 pub fn average_stack(c: &mut Criterion) {
     // Read test images

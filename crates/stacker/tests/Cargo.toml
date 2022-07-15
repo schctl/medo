@@ -1,0 +1,28 @@
+[package]
+name = "medo_stacker_tests"
+version = "0.0.1"
+authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
+edition = "2021"
+license = "MIT"
+publish = false
+
+[dependencies]
+opencv = "0.66"
+medo_stacker = { path = "../" }
+
+[dev-dependencies]
+rayon = "1"
+criterion = "0.3"
+
+# Benchmarks
+[[bench]]
+name = "homography"
+harness = false
+
+[[bench]]
+name = "star_mask"
+harness = false
+
+[[bench]]
+name = "stacker"
+harness = false

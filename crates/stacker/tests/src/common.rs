@@ -8,9 +8,11 @@ fn relative<P: AsRef<Path>>(path: P) -> String {
 }
 
 fn relative_target<P: AsRef<Path>>(path: P) -> String {
+    // I don't like doing this
+    std::fs::create_dir_all(format!("{}/target/tmp/", env!("CARGO_MANIFEST_DIR"),)).unwrap();
     format!(
-        "{}/{}",
-        env!("CARGO_TARGET_TMPDIR"),
+        "{}/target/tmp/{}",
+        env!("CARGO_MANIFEST_DIR"),
         path.as_ref().display()
     )
 }

@@ -5,8 +5,7 @@ use opencv::prelude::{MatExprTraitConst, MatTraitConst, MatTraitConstManual};
 use medo_stacker::contour;
 use medo_stacker::homography;
 use medo_stacker::star;
-
-mod common;
+use medo_stacker_tests::common;
 
 fn warp_image(image: &Mat, warp: &Mat, size: Size) -> Mat {
     let mut dst = Mat::default();

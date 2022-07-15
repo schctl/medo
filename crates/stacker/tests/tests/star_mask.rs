@@ -2,8 +2,7 @@ use opencv::prelude::{MatTraitConst, MatTraitConstManual};
 
 use medo_stacker::contour;
 use medo_stacker::star;
-
-mod common;
+use medo_stacker_tests::common;
 
 #[test]
 fn create_star_mask() {

@@ -328,10 +328,18 @@ dependencies = [
 name = "medo_stacker"
 version = "0.0.1"
 dependencies = [
+ "opencv",
+ "thiserror",
+]
+
+[[package]]
+name = "medo_stacker_tests"
+version = "0.0.1"
+dependencies = [
  "criterion",
+ "medo_stacker",
  "opencv",
  "rayon",
- "thiserror",
 ]
 
 [[package]]

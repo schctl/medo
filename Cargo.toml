@@ -1,6 +1,7 @@
 [workspace]
 members = [
-    "crates/stacker"
+    "crates/stacker",
+    "crates/stacker/tests"
 ]
 
 [package]

@@ -1,8 +1,8 @@
 use criterion::{criterion_group, criterion_main, Criterion};
+
 use medo_stacker::contour;
 use medo_stacker::star;
-
-mod common;
+use medo_stacker_tests::common;
 
 pub fn find_contours(c: &mut Criterion) {
     // Read test image
