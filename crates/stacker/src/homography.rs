@@ -30,6 +30,11 @@ pub struct Calculator {
     dst: Mat,
 }
 
+// SAFETY: Calculator will never expose a mutable API, and its internal
+// matrix should be read-only. Hence this should be sound.
+unsafe impl Send for Calculator {}
+unsafe impl Sync for Calculator {}
+
 impl Calculator {
     /// Create a new calculator.
     ///

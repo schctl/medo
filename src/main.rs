@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 use opencv::core::{Mat, MatTraitConst, MatTraitConstManual, Scalar, Vector};
 use opencv::imgcodecs;
 use opencv::imgproc;
@@ -30,6 +32,7 @@ fn main() {
 
     // Align images
     let mut images = iter
+        .par_bridge()
         .map(move |p| {
             // Read image
             let image = imgcodecs::imread(
@@ -68,6 +71,5 @@ fn main() {
     let res = stacker.last().unwrap();
 
     // Write result
-    println!("{}", out_path);
     imgcodecs::imwrite(&out_path, &res, &Vector::new()).unwrap();
 }
