@@ -53,18 +53,18 @@ pub fn is_contour_a_star(cnt: &Contour, opts: DetectionOpts) -> Result<bool> {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ContourDetectionOpts {
     /// Star detections options.
-    star_detection: DetectionOpts,
+    pub star_detection: DetectionOpts,
     /// Threshold brightness.
-    threshold_brightness: f32,
+    pub threshold_brightness: f32,
     /// Maximum brightness.
-    max_brightness: f32,
+    pub max_brightness: f32,
 }
 
 impl Default for ContourDetectionOpts {
     fn default() -> Self {
         Self {
             star_detection: Default::default(),
-            threshold_brightness: 127.0,
+            threshold_brightness: 186.0,
             max_brightness: 255.0,
         }
     }
