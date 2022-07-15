@@ -45,12 +45,12 @@ impl<T: Iterator<Item = Mat>> super::Stacker for Stacker<T> {}
 mod test {
     use super::*;
 
-    use opencv::core::prelude::MatTraitConst;
     use opencv::core::prelude::MatExprTraitConst;
+    use opencv::core::prelude::MatTraitConst;
 
     /// Check if the result of stacking identical matrices is itself.
     #[test]
-    fn ident_mats_stack_to_itself() {
+    fn identical_mats_stack_to_itself() {
         const SIZE: i32 = 5;
 
         // Create vec of identity matrices

@@ -1,6 +1,6 @@
 use opencv::core::{Mat, Size};
 use opencv::imgproc;
-use opencv::prelude::{MatTraitConst, MatTraitConstManual};
+use opencv::prelude::{MatExprTraitConst, MatTraitConst, MatTraitConstManual};
 
 use medo_stacker::contour;
 use medo_stacker::homography;
@@ -33,6 +33,29 @@ fn star_mask_image(img: &Mat) -> Mat {
     let mut dst = Mat::default();
     opencv::core::bitwise_and(img, &mask, &mut dst, &opencv::core::no_array()).unwrap();
     dst
+}
+
+#[test]
+fn identical_images_have_no_homography() {
+    // Read test image
+    let image = common::read_image("image");
+    // Calculate homography
+    let calculator = homography::Calculator::new(&image).unwrap();
+    let homography = calculator.calculate(&image, Default::default()).unwrap();
+    // Check result
+    let imat = Mat::eye(3, 3, opencv::core::CV_32F)
+        .unwrap()
+        .to_mat()
+        .unwrap();
+    let res = (homography - imat).into_result().unwrap().to_mat().unwrap();
+    for i in 0..3 {
+        for j in 0..3 {
+            assert_eq!(
+                f32::trunc(*res.at_nd::<f32>(&[i, j]).unwrap() * 100_000.0) / 100_000.0,
+                0.0
+            );
+        }
+    }
 }
 
 #[test]
