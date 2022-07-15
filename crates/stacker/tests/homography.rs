@@ -1,6 +1,6 @@
 use opencv::core::{Mat, Size};
 use opencv::imgproc;
-use opencv::prelude::{MatTraitConstManual, MatTraitConst};
+use opencv::prelude::{MatTraitConst, MatTraitConstManual};
 
 use medo_stacker::contour;
 use medo_stacker::homography;
