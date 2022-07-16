@@ -13,9 +13,12 @@ license = "MIT"
 
 [dependencies]
 anyhow = "1"
-log = "0.4"
+lazy_static = "1"
+libc = "0.2"
 medo_stacker = { path = "crates/stacker" }
 opencv = "0.66"
 rayon = "1"
+thiserror = "1"
 
-env_logger = "0.9"
+tracing = "0.1"
+tracing-subscriber = "0.3"
