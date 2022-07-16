@@ -29,7 +29,6 @@ impl Group {
     /// Process this group's pipeline.
     pub fn process(&self) -> Result<Mat> {
         let mut p_input = PipelineInput {
-            data: Mat::default(),
             iter: Box::new(self.entries.entries.iter().map(|e| Cow::Borrowed(e))),
         };
         tracing::info!("Beginning pipeline");
@@ -49,7 +48,7 @@ impl Group {
             }
         }
         tracing::info!("Pipeline trailed");
-        Ok(p_input.data)
+        Err(Error::PipelineStageFailed)
     }
 
     /// The stacking stage of the pipeline.
@@ -61,7 +60,10 @@ impl Group {
 
         tracing::info!("Stacking {}", self.name);
         let stacker = Stacker::new(iter);
-        let data = stacker.last().ok_or(Error::PipelineStageFailed)?;
+        let data = stacker
+            .filter_map(medo_stacker::Result::ok)
+            .last()
+            .ok_or(Error::PipelineStageFailed)?;
         tracing::info!("Done stacking {}", self.name);
         Ok(PipelineOutput::Ending(data))
     }
@@ -85,12 +87,12 @@ impl Group {
         };
 
         // Create alignment calculator
-        tracing::info!("Preparing reference...");
+        tracing::debug!("Preparing reference...");
         let first = util::read_image(self.entries.reference.path())?;
         let first_mask = star::find_contours(&first, Default::default())?.collect();
         let first_mask = contour::create_mask(first.size()?, first.typ(), &first_mask)?;
         let calculator = homography::Calculator::new(&first_mask)?;
-        tracing::info!("Done preparing reference");
+        tracing::debug!("Done preparing reference");
 
         // Align images
         let images = input
@@ -136,7 +138,6 @@ impl Group {
             .into_iter();
 
         Ok(PipelineOutput::Piping(PipelineInput {
-            data: input.data,
             iter: Box::new(images),
         }))
     }

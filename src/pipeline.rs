@@ -12,7 +12,6 @@ pub enum PipelineStage {
 
 /// The input to a stage of a pipeline.
 pub struct PipelineInput<'a> {
-    pub data: Mat,
     pub iter: Box<dyn Iterator<Item = Cow<'a, Entry>> + Send + 'a>,
 }
 

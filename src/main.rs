@@ -14,10 +14,17 @@ pub use medo::Medo;
 pub use pipeline::*;
 
 fn init_log() {
+    #[cfg(debug_assertions)]
+    let level = tracing::Level::DEBUG;
+    #[cfg(not(debug_assertions))]
+    let level = tracing::Level::INFO;
     let format = tracing_subscriber::fmt::format()
         .without_time()
         .with_thread_names(true);
-    tracing_subscriber::fmt().event_format(format).init();
+    tracing_subscriber::fmt()
+        .event_format(format)
+        .with_max_level(level)
+        .init();
 }
 
 fn main() {

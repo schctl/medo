@@ -2,6 +2,8 @@
 
 use opencv::core::Mat;
 
+use crate::Result;
+
 pub struct Stacker<T: Iterator<Item = Mat>> {
     out: Mat,
     iter: T,
@@ -20,7 +22,7 @@ impl<T: Iterator<Item = Mat>> Stacker<T> {
 }
 
 impl<T: Iterator<Item = Mat>> Iterator for Stacker<T> {
-    type Item = Mat;
+    type Item = Result<Mat>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(|next| {
@@ -29,12 +31,12 @@ impl<T: Iterator<Item = Mat>> Iterator for Stacker<T> {
             let beta = 1.0 - alpha;
             // Add
             let mut new = Mat::default();
-            let _ = opencv::core::add_weighted(&next, alpha, &self.out, beta, 0.0, &mut new, -1);
+            opencv::core::add_weighted(&next, alpha, &self.out, beta, 0.0, &mut new, -1)?;
             // Update progress
             self.out = new;
             self.prog += 1;
 
-            self.out.clone()
+            Ok(self.out.clone())
         })
     }
 }
@@ -62,7 +64,7 @@ mod test {
 
         // Stack
         let stacker = Stacker::new(mats);
-        let last = stacker.last().unwrap();
+        let last = stacker.last().unwrap().unwrap();
 
         // Assert that average is an identity matrix
         for i in 0..SIZE {
@@ -83,7 +85,7 @@ mod test {
 
         // Stack
         let stacker = Stacker::new(mats);
-        let last = stacker.last().unwrap();
+        let last = stacker.last().unwrap().unwrap();
 
         // Check result
         for i in 0..2 {

@@ -1,9 +1,13 @@
 //! Image stacking tools.
 
+use opencv::core::Mat;
+
+use crate::Result;
+
 pub mod average;
 
 /// A marker trait describing the behavior of a stacking iterator.
 ///
 /// The behavior expected of a stacker is to stack each subsequent provided image on each iteration and
 /// returning its progress. Once the stacking is over, return [`None`].
-pub trait Stacker: Iterator {}
+pub trait Stacker: Iterator<Item = Result<Mat>> {}
