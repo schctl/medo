@@ -64,7 +64,7 @@ impl Default for ContourDetectionOpts {
     fn default() -> Self {
         Self {
             star_detection: Default::default(),
-            threshold_brightness: 186.0,
+            threshold_brightness: 144.0,
             max_brightness: 255.0,
         }
     }

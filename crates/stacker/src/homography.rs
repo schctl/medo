@@ -19,7 +19,7 @@ pub struct CalculateOpts {
 
 impl Default for CalculateOpts {
     fn default() -> Self {
-        Self { iterations: 200 }
+        Self { iterations: 100 }
     }
 }
 
