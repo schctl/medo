@@ -1,28 +1,36 @@
 //! Method of stacking by averaging.
 
+use std::borrow::Cow;
+
 use medo_core::cv;
 use medo_core::cv::core::Mat;
+use medo_core::entry::Entry;
 use medo_core::Result;
 
-pub struct Stacker<T: Iterator<Item = Mat>> {
-    out: Mat,
+#[must_use = "iterators are lazy and do nothing unless consumed"]
+pub struct Stacker<'iter, T: Iterator<Item = Cow<'iter, Entry>>> {
+    out: Entry,
     iter: T,
     prog: usize,
 }
 
-impl<T: Iterator<Item = Mat>> Stacker<T> {
-    pub fn new<F: IntoIterator<Item = T::Item, IntoIter = T>>(iter: F) -> Self {
+impl<'iter, T: Iterator<Item = Cow<'iter, Entry>>> Stacker<'iter, T> {
+    pub fn new<F: IntoIterator<Item = T::Item, IntoIter = T>>(iter: F) -> Result<Self> {
         let mut iter = iter.into_iter();
-        Self {
-            out: iter.next().unwrap(),
-            iter,
-            prog: 0,
-        }
+        let mut out = iter.next().unwrap().into_owned();
+        out.read_into_image()?;
+        Ok(Self { out, iter, prog: 0 })
+    }
+
+    /// Leak the underlying data store.
+    #[inline]
+    pub fn leak(self) -> Entry {
+        self.out
     }
 }
 
-impl<T: Iterator<Item = Mat>> Iterator for Stacker<T> {
-    type Item = Result<Mat>;
+impl<'iter, T: Iterator<Item = Cow<'iter, Entry>>> Iterator for Stacker<'iter, T> {
+    type Item = Result<&'iter Entry>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(|next| {
@@ -31,67 +39,20 @@ impl<T: Iterator<Item = Mat>> Iterator for Stacker<T> {
             let beta = 1.0 - alpha;
             // Add
             let mut new = Mat::default();
-            cv::core::add_weighted(&next, alpha, &self.out, beta, 0.0, &mut new, -1)?;
+            cv::core::add_weighted(
+                next.read_image()?.as_ref(),
+                alpha,
+                self.out.read_into_image()?,
+                beta,
+                0.0,
+                &mut new,
+                -1,
+            )?;
             // Update progress
-            self.out = new;
+            self.out = Entry::new_image(self.out.name(), new)?;
             self.prog += 1;
 
-            Ok(self.out.clone())
+            Ok(unsafe { &*(&self.out as *const Entry) })
         })
-    }
-}
-
-impl<T: Iterator<Item = Mat>> super::Stacker for Stacker<T> {}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    use cv::core::prelude::MatExprTraitConst;
-    use cv::core::prelude::MatTraitConst;
-
-    /// Check if the result of stacking identical matrices is itself.
-    #[test]
-    fn identical_mats_stack_to_itself() {
-        const SIZE: i32 = 5;
-
-        // Create vec of identity matrices
-        let imat = Mat::eye(SIZE, SIZE, cv::core::CV_32F)
-            .unwrap()
-            .to_mat()
-            .unwrap();
-        let mats = (0..SIZE).map(|_| imat.clone()).collect::<Vec<_>>();
-
-        // Stack
-        let stacker = Stacker::new(mats);
-        let last = stacker.last().unwrap().unwrap();
-
-        // Assert that average is an identity matrix
-        for i in 0..SIZE {
-            assert_eq!(*last.at_nd::<f32>(&[i, i]).unwrap(), 1.0);
-        }
-    }
-
-    /// Try stacking four matrices with one's in each corner.
-    #[test]
-    fn four_cornered_mats() {
-        // Initialize
-        let mats = [
-            Mat::from_slice_2d(&[[1.0_f32, 0.0_f32], [0.0_f32, 0.0_f32]]).unwrap(),
-            Mat::from_slice_2d(&[[0.0_f32, 1.0_f32], [0.0_f32, 0.0_f32]]).unwrap(),
-            Mat::from_slice_2d(&[[0.0_f32, 0.0_f32], [1.0_f32, 0.0_f32]]).unwrap(),
-            Mat::from_slice_2d(&[[0.0_f32, 0.0_f32], [0.0_f32, 1.0_f32]]).unwrap(),
-        ];
-
-        // Stack
-        let stacker = Stacker::new(mats);
-        let last = stacker.last().unwrap().unwrap();
-
-        // Check result
-        for i in 0..2 {
-            for j in 0..2 {
-                assert_eq!(*last.at_nd::<f32>(&[i, j]).unwrap(), 0.25);
-            }
-        }
     }
 }

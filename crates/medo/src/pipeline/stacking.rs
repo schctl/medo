@@ -3,8 +3,8 @@
 use std::borrow::Cow;
 
 use medo_core::entry::{Entries, Entry, OwnedEntryIter};
-use medo_core::{Error, Result};
-use medo_stacker::stacker::average::Stacker;
+use medo_core::Result;
+use medo_stacker::stacker::Stacker;
 
 #[derive(Debug, Clone, Default)]
 pub struct Opts {}
@@ -16,22 +16,23 @@ pub fn process<'scope>(
     let span = tracing::info_span!("stage_stacking");
     let _enter = span.enter();
 
-    let iter = [input.reference]
-        .into_iter()
-        .chain(input.entries)
-        .map(|e| e.read_image().unwrap().into_owned());
+    let iter = [input.reference].into_iter().chain(input.entries);
 
-    // FIXME: identify this run of the stacker
     tracing::info!("stacking...");
-    let stacker = Stacker::new(iter);
-    let data = stacker
-        .filter_map(Result::ok)
-        .last()
-        .ok_or(Error::PipelineStageFailed)?;
+    let mut stacker = Stacker::average(iter)?;
+    for (n, r) in stacker.by_ref().enumerate() {
+        // FIXME: identify image that failed to stack
+        if let Err(e) = r {
+            tracing::error!(index = n, "unable to stack an image: {}", e)
+        }
+    }
     tracing::info!("done stacking");
 
     Ok(Entries {
-        reference: Cow::Owned(Entry::new_image("Stack Result", data)?),
+        reference: Cow::Owned(Entry::new_image(
+            "Stack Result",
+            stacker.leak().into_image()?,
+        )?),
         entries: Box::new(std::iter::empty()),
     })
 }

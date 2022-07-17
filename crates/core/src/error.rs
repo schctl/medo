@@ -11,9 +11,6 @@ pub enum Error {
     Io(#[from] io::Error),
     #[error(transparent)]
     OpenCV(#[from] opencv::Error),
-    // FIXME: provide information on the stage
-    #[error("pipeline stage failed")]
-    PipelineStageFailed,
     #[error("{0}")]
     Other(String),
     #[error("{0}")]

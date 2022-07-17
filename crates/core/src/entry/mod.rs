@@ -63,10 +63,10 @@ impl Entry {
     /// Get the image associated with this entry.
     #[inline]
     pub fn read_image(&self) -> Result<Cow<'_, Mat>> {
-        match self {
-            Self::Path(p) => Ok(Cow::Owned(util::read_image(p.path())?)),
-            Self::Image(p) => Ok(Cow::Borrowed(p.image())),
-        }
+        Ok(match self {
+            Self::Path(p) => Cow::Owned(util::read_image(p.path())?),
+            Self::Image(p) => Cow::Borrowed(p.image()),
+        })
     }
 
     /// Get and *own* the image associated with this entry.
@@ -78,6 +78,15 @@ impl Entry {
                 self.read_into_image()
             }
             Self::Image(p) => Ok(p.image()),
+        }
+    }
+
+    /// Get the image associated with this entry and consume self.
+    #[inline]
+    pub fn into_image(self) -> Result<Mat> {
+        match self {
+            Self::Path(p) => Ok(util::read_image(p.path())?),
+            Self::Image(p) => Ok(p.image.0),
         }
     }
 }

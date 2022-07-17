@@ -1,7 +1,7 @@
+use medo_core::cv;
 use medo_core::cv::core::{Mat, Size};
 use medo_core::cv::imgproc;
 use medo_core::cv::prelude::{MatExprTraitConst, MatTraitConst, MatTraitConstManual};
-use medo_core::cv;
 use medo_stacker::contour;
 use medo_stacker::homography;
 use medo_stacker::star;
@@ -42,10 +42,7 @@ fn identical_images_have_no_homography() {
     let calculator = homography::Calculator::new(&image).unwrap();
     let homography = calculator.calculate(&image, Default::default()).unwrap();
     // Check result
-    let imat = Mat::eye(3, 3, cv::core::CV_32F)
-        .unwrap()
-        .to_mat()
-        .unwrap();
+    let imat = Mat::eye(3, 3, cv::core::CV_32F).unwrap().to_mat().unwrap();
     let res = (homography - imat).into_result().unwrap().to_mat().unwrap();
     for i in 0..3 {
         for j in 0..3 {

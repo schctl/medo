@@ -11,7 +11,7 @@ use crate::Result;
 #[derive(Debug, Clone)]
 pub struct Image {
     name: String,
-    image: OpaqueMat,
+    pub(super) image: OpaqueMat,
 }
 
 impl PartialEq for Image {
