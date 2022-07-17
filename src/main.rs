@@ -1,17 +1,15 @@
+use std::borrow::Cow;
 use std::path::PathBuf;
 
 pub mod entry;
 pub mod error;
 pub mod group;
-pub mod medo;
 pub mod pipeline;
 pub mod util;
 
-pub use entry::{Entries, Entry};
-pub use error::*;
-pub use group::Group;
-pub use medo::Medo;
-pub use pipeline::*;
+use entry::{Entries, Entry};
+use error::*;
+use group::Group;
 
 fn init_log() {
     #[cfg(debug_assertions)]
@@ -41,18 +39,27 @@ fn main() {
     let out_path = PathBuf::from(&args.next().unwrap());
 
     // Run app
-    let entries = std::fs::read_dir(&src_dir)
-        .unwrap()
-        .filter_map(|d| d.ok().map(|d| Entry::new_owned(d.path()).ok()).flatten());
-    let entries = Entries::new(entries).unwrap();
-    let pipeline = vec![PipelineStage::Alignment, PipelineStage::Stacking];
-    let group = Group {
+    let mut entries = std::fs::read_dir(&src_dir).unwrap().filter_map(|d| {
+        d.ok()
+            .and_then(|d| Entry::new_path_owned(d.path()).ok().map(Cow::Owned))
+    });
+    let reference = entries.next().unwrap();
+    let entries = Entries { reference, entries }.into_owned();
+    // Create default group
+    let pipeline = pipeline::Pipeline {
+        stages: vec![
+            pipeline::Stage::Alignment(Default::default()),
+            pipeline::Stage::Stacking(Default::default()),
+        ],
+    };
+    let mut group = Group {
         name: "default".to_owned(),
-        entries,
         pipeline,
+        entries,
+        pipeline_output: None,
     };
     let out = group.process().unwrap();
 
     // Write result
-    util::write_image(&out_path, &out).unwrap();
+    util::write_image(&out_path, out.reference.read_image().unwrap().as_ref()).unwrap();
 }
