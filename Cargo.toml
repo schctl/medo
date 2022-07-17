@@ -1,24 +1,31 @@
 [workspace]
 members = [
+    "crates/core",
+    "crates/medo",
     "crates/stacker",
-    "crates/stacker/tests"
+    "crates/stacker/tests",
 ]
 
 [package]
-name = "medo"
+name = "medo_ui"
 version = "0.0.1"
 authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
 edition = "2021"
 license = "MIT"
+publish = false
+rust-version = "1.61"
 
 [dependencies]
-anyhow = "1"
-lazy_static = "1"
-libc = "0.2"
-medo_stacker = { path = "crates/stacker" }
-opencv = "0.66"
+medo = { path = "crates/medo" }
 rayon = "1"
-thiserror = "1"
-
 tracing = "0.1"
 tracing-subscriber = "0.3"
+
+[[bin]]
+path = "crates/ui/main.rs"
+name = "medo"
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1

@@ -23,6 +23,7 @@ pub enum Entry {
 // Constructors
 impl Entry {
     /// Create a new path-based entry.
+    #[inline]
     pub fn new_path<OwnPath>(path: OwnPath) -> Result<Self>
     where
         OwnPath: ToOwned<Owned = PathBuf>,
@@ -31,16 +32,19 @@ impl Entry {
     }
 
     /// Create a new path-based entry from an owned path.
+    #[inline]
     pub fn new_path_owned(path: PathBuf) -> Result<Self> {
         Ok(Self::Path(Path::new_owned(path)?))
     }
 
     /// Create a new image-based entry.
+    #[inline]
     pub fn new_image<OwnString: ToString>(name: OwnString, image: Mat) -> Result<Self> {
         Ok(Self::Image(Image::new(name, image)?))
     }
 
     /// Create a new image-based entry.
+    #[inline]
     pub fn new_image_owned(name: String, image: Mat) -> Result<Self> {
         Ok(Self::Image(Image::new_owned(name, image)?))
     }
@@ -48,6 +52,7 @@ impl Entry {
 
 impl Entry {
     /// Get the name associated to this entry.
+    #[inline]
     pub fn name(&self) -> Cow<'_, str> {
         match self {
             Self::Path(p) => p.file_name(),
@@ -56,6 +61,7 @@ impl Entry {
     }
 
     /// Get the image associated with this entry.
+    #[inline]
     pub fn read_image(&self) -> Result<Cow<'_, Mat>> {
         match self {
             Self::Path(p) => Ok(Cow::Owned(util::read_image(p.path())?)),
@@ -64,6 +70,7 @@ impl Entry {
     }
 
     /// Get and *own* the image associated with this entry.
+    #[inline]
     pub fn read_into_image(&mut self) -> Result<&Mat> {
         match self {
             Self::Path(p) => {
@@ -76,12 +83,14 @@ impl Entry {
 }
 
 /// A group of entries.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Entries<'entry, EntryIter: Iterator<Item = Cow<'entry, Entry>>> {
     pub reference: Cow<'entry, Entry>,
     pub entries: EntryIter,
 }
 
 impl<'entry, EntryIter: Iterator<Item = Cow<'entry, Entry>>> Entries<'entry, EntryIter> {
+    #[inline]
     pub fn into_owned(self) -> OwnedEntries {
         OwnedEntries {
             reference: self.reference.into_owned(),
@@ -106,6 +115,7 @@ pub struct OwnedEntries {
 
 impl OwnedEntries {
     /// Return a borrowed group of entries.
+    #[inline]
     pub fn to_borrow(&self) -> Entries<OwnedEntryIter> {
         Entries {
             reference: Cow::Borrowed(&self.reference),

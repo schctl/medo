@@ -5,8 +5,8 @@ use medo_stacker_tests::common;
 
 pub fn basic_homography(c: &mut Criterion) {
     // Read test images
-    let image = common::read_image("image");
-    let template = common::read_image("template");
+    let image = common::read_image("image").unwrap();
+    let template = common::read_image("template").unwrap();
     let calculator = homography::Calculator::new(&template).unwrap();
     // Run benchmark
     c.bench_function("Basic Alignment Calculation", |b| {

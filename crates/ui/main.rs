@@ -1,15 +1,10 @@
 use std::borrow::Cow;
 use std::path::PathBuf;
 
-pub mod entry;
-pub mod error;
-pub mod group;
-pub mod pipeline;
-pub mod util;
-
-use entry::{Entries, Entry};
-use error::*;
-use group::Group;
+use medo::core::entry::{Entries, Entry};
+use medo::core::util;
+use medo::group;
+use medo::pipeline;
 
 fn init_log() {
     #[cfg(debug_assertions)]
@@ -54,7 +49,7 @@ fn main() {
             pipeline::Stage::Stacking(Default::default()),
         ],
     };
-    let mut group = Group {
+    let mut group = group::Group {
         name: "default".to_owned(),
         pipeline,
         entries,

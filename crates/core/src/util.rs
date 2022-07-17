@@ -8,11 +8,15 @@ use opencv::imgcodecs;
 use crate::Result;
 
 lazy_static::lazy_static! {
-    static ref EMPTY_VEC_I32: OpaqueVector<i32> = OpaqueVector(Vector::new());
+    /// Static reference to an empty vector.
+    pub static ref EMPTY_VEC_I32: OpaqueVector<i32> = OpaqueVector(Vector::new());
+    /// Static reference to a default OpenCV matrix.
+    pub static ref DEFAULT_MAT: OpaqueMat = OpaqueMat(Mat::default());
 }
 
 /// Opaque and sync wrapper for C++ vector.
-struct OpaqueVector<T>(Vector<T>)
+#[derive(Debug, Default)]
+pub struct OpaqueVector<T>(pub Vector<T>)
 where
     Vector<T>: VectorExtern<T>,
     T: VectorElement;
@@ -24,7 +28,13 @@ where
 {
 }
 
+/// Opaque and sync wrapper for OpenCV matrix.
+#[derive(Debug, Clone)]
+pub struct OpaqueMat(pub Mat);
+unsafe impl Sync for OpaqueMat {}
+
 /// Get a temporary directory path to work with.
+#[inline]
 pub fn temp_dir() -> PathBuf {
     PathBuf::from("/tmp/medo")
 }
@@ -43,6 +53,7 @@ pub fn write_image<P: AsRef<Path>>(path: P, image: &Mat) -> Result<()> {
 }
 
 /// Convenience method to read a BGR image.
+#[inline]
 pub fn read_image<P: AsRef<Path>>(path: P) -> Result<Mat> {
     Ok(imgcodecs::imread(
         path.as_ref().to_string_lossy().as_ref(),

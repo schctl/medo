@@ -1,10 +1,10 @@
 //! Tools to detect stars in an image and create a mask.
 
-use opencv::core::{Mat, Point, Point2f, Vector};
-use opencv::imgproc;
+use medo_core::cv::core::{Mat, Point, Point2f, Vector};
+use medo_core::cv::imgproc;
+use medo_core::Result;
 
 use crate::contour::Contour;
-use crate::Result;
 
 /// Get the area of a circle.
 fn area_of_circle(radius: f32) -> f32 {

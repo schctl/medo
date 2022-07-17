@@ -14,8 +14,6 @@ pub enum Error {
     // FIXME: provide information on the stage
     #[error("pipeline stage failed")]
     PipelineStageFailed,
-    #[error(transparent)]
-    Stacker(#[from] medo_stacker::Error),
     #[error("{0}")]
     Other(String),
     #[error("{0}")]
@@ -23,6 +21,7 @@ pub enum Error {
 }
 
 impl From<io::ErrorKind> for Error {
+    #[inline]
     fn from(e: io::ErrorKind) -> Self {
         Self::Io(io::Error::from(e))
     }

@@ -1,8 +1,7 @@
 //! Image stacking tools.
 
-use opencv::core::Mat;
-
-use crate::Result;
+use medo_core::cv::core::Mat;
+use medo_core::Result;
 
 pub mod average;
 

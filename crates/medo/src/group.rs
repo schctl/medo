@@ -1,8 +1,9 @@
 //! Defines operations on groups of entries.
 
-use crate::entry::OwnedEntries;
+use medo_core::entry::OwnedEntries;
+use medo_core::Result;
+
 use crate::pipeline::Pipeline;
-use crate::Result;
 
 /// A group of entries and associated processing options.
 pub struct Group {

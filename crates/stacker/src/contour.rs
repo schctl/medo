@@ -1,9 +1,9 @@
 //! Contour tools.
 
-use opencv::core::{Mat, Point, Scalar, Size, Vector};
-use opencv::imgproc;
-
-use crate::Result;
+use medo_core::cv;
+use medo_core::cv::core::{Mat, Point, Scalar, Size, Vector};
+use medo_core::cv::imgproc;
+use medo_core::Result;
 
 pub type Contour = Vector<Point>;
 
@@ -19,7 +19,7 @@ pub fn create_mask(size: Size, ty: i32, contours: &Vector<Contour>) -> Result<Ma
             Scalar::new(255.0, 255.0, 255.0, 255.0),
             -1,
             imgproc::LINE_8,
-            &opencv::core::no_array(),
+            &cv::core::no_array(),
             i32::MAX,
             Point::default(),
         )?;

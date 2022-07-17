@@ -3,17 +3,17 @@
 use std::borrow::Cow;
 use std::path::PathBuf;
 
-use opencv::core::{Mat, MatTraitConst, MatTraitConstManual, Scalar};
-use opencv::imgproc;
 use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 
+use medo_core::cv;
+use medo_core::cv::core::{Mat, MatTraitConst, MatTraitConstManual, Scalar};
+use medo_core::cv::imgproc;
+use medo_core::entry::{Entries, Entry, OwnedEntryIter};
+use medo_core::util;
+use medo_core::Result;
 use medo_stacker::contour;
 use medo_stacker::homography;
 use medo_stacker::star;
-
-use crate::entry::{Entries, Entry, OwnedEntryIter};
-use crate::util;
-use crate::Result;
 
 #[derive(Debug, Clone, Default)]
 pub struct Opts {}
@@ -70,7 +70,7 @@ pub fn process<'scope>(
                 &warp,
                 image.size().unwrap(),
                 imgproc::INTER_LINEAR,
-                opencv::core::BORDER_CONSTANT,
+                cv::core::BORDER_CONSTANT,
                 Scalar::default(),
             )?;
             // Write

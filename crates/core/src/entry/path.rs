@@ -14,6 +14,7 @@ pub struct Path {
 
 impl Path {
     /// Create a new image entry from a path.
+    #[inline]
     pub fn new<OwnPath>(path: OwnPath) -> Result<Self>
     where
         OwnPath: ToOwned<Owned = PathBuf>,
@@ -31,11 +32,13 @@ impl Path {
     }
 
     /// Get the path to this entry.
+    #[inline]
     pub fn path(&self) -> &PathRef {
         self.path.as_path()
     }
 
     /// Get the name of this entry.
+    #[inline]
     pub fn file_name(&self) -> Cow<'_, str> {
         self.path.file_name().unwrap().to_string_lossy()
     }

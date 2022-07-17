@@ -1,5 +1,5 @@
 [package]
-name = "medo_stacker"
+name = "medo_core"
 version = "0.0.1"
 authors = ["Sachin Cherian <sachinctl@protonmail.com>"]
 edition = "2021"
@@ -7,4 +7,6 @@ license = "MIT"
 publish = false
 
 [dependencies]
-medo_core = { path = "../core" }
+lazy_static = "1"
+opencv = "0.66"
+thiserror = "1"

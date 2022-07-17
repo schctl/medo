@@ -1,7 +1,7 @@
-use opencv::core::{Mat, Size};
-use opencv::imgproc;
-use opencv::prelude::{MatExprTraitConst, MatTraitConst, MatTraitConstManual};
-
+use medo_core::cv::core::{Mat, Size};
+use medo_core::cv::imgproc;
+use medo_core::cv::prelude::{MatExprTraitConst, MatTraitConst, MatTraitConstManual};
+use medo_core::cv;
 use medo_stacker::contour;
 use medo_stacker::homography;
 use medo_stacker::star;
@@ -15,8 +15,8 @@ fn warp_image(image: &Mat, warp: &Mat, size: Size) -> Mat {
         &warp,
         size,
         imgproc::INTER_LINEAR,
-        opencv::core::BORDER_CONSTANT,
-        opencv::core::Scalar::default(),
+        cv::core::BORDER_CONSTANT,
+        cv::core::Scalar::default(),
     )
     .unwrap();
     dst
@@ -30,19 +30,19 @@ fn star_mask_image(img: &Mat) -> Mat {
     let mask = contour::create_mask(img.size().unwrap(), img.typ(), &contours).unwrap();
     // Apply the mask
     let mut dst = Mat::default();
-    opencv::core::bitwise_and(img, &mask, &mut dst, &opencv::core::no_array()).unwrap();
+    cv::core::bitwise_and(img, &mask, &mut dst, &cv::core::no_array()).unwrap();
     dst
 }
 
 #[test]
 fn identical_images_have_no_homography() {
     // Read test image
-    let image = common::read_image("image");
+    let image = common::read_image("image").unwrap();
     // Calculate homography
     let calculator = homography::Calculator::new(&image).unwrap();
     let homography = calculator.calculate(&image, Default::default()).unwrap();
     // Check result
-    let imat = Mat::eye(3, 3, opencv::core::CV_32F)
+    let imat = Mat::eye(3, 3, cv::core::CV_32F)
         .unwrap()
         .to_mat()
         .unwrap();
@@ -60,22 +60,22 @@ fn identical_images_have_no_homography() {
 #[test]
 fn find_homography_and_warp() {
     // Read test images
-    let image = common::read_image("image");
-    let template = common::read_image("template");
+    let image = common::read_image("image").unwrap();
+    let template = common::read_image("template").unwrap();
     // Calculate homography
     let calculator = homography::Calculator::new(&template).unwrap();
     let homography = calculator.calculate(&image, Default::default()).unwrap();
     // Warp image using homography
     let warped = warp_image(&image, &homography, template.size().unwrap());
     // Write result
-    common::write_image("ecc", &warped);
+    common::write_image("ecc", &warped).unwrap();
 }
 
 #[test]
 fn find_homography_from_star_mask_and_warp() {
     // Read test images
-    let image = common::read_image("image");
-    let template = common::read_image("template");
+    let image = common::read_image("image").unwrap();
+    let template = common::read_image("template").unwrap();
     // Mask images
     let image = star_mask_image(&image);
     let template = star_mask_image(&template);
@@ -85,5 +85,5 @@ fn find_homography_from_star_mask_and_warp() {
     // Warp image using homography
     let warped = warp_image(&image, &homography, template.size().unwrap());
     // Write result
-    common::write_image("ecc_star_mask", &warped);
+    common::write_image("ecc_star_mask", &warped).unwrap();
 }

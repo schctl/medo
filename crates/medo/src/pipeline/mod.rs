@@ -1,7 +1,7 @@
 //! Defines an entry group's processing pipeline.
 
-use crate::entry::{Entries, OwnedEntryIter};
-use crate::Result;
+use medo_core::entry::{Entries, OwnedEntryIter};
+use medo_core::Result;
 
 pub mod alignment;
 pub mod stacking;

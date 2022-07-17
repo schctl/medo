@@ -1,8 +1,8 @@
 //! Method of stacking by averaging.
 
-use opencv::core::Mat;
-
-use crate::Result;
+use medo_core::cv;
+use medo_core::cv::core::Mat;
+use medo_core::Result;
 
 pub struct Stacker<T: Iterator<Item = Mat>> {
     out: Mat,
@@ -31,7 +31,7 @@ impl<T: Iterator<Item = Mat>> Iterator for Stacker<T> {
             let beta = 1.0 - alpha;
             // Add
             let mut new = Mat::default();
-            opencv::core::add_weighted(&next, alpha, &self.out, beta, 0.0, &mut new, -1)?;
+            cv::core::add_weighted(&next, alpha, &self.out, beta, 0.0, &mut new, -1)?;
             // Update progress
             self.out = new;
             self.prog += 1;
@@ -47,8 +47,8 @@ impl<T: Iterator<Item = Mat>> super::Stacker for Stacker<T> {}
 mod test {
     use super::*;
 
-    use opencv::core::prelude::MatExprTraitConst;
-    use opencv::core::prelude::MatTraitConst;
+    use cv::core::prelude::MatExprTraitConst;
+    use cv::core::prelude::MatTraitConst;
 
     /// Check if the result of stacking identical matrices is itself.
     #[test]
@@ -56,7 +56,7 @@ mod test {
         const SIZE: i32 = 5;
 
         // Create vec of identity matrices
-        let imat = Mat::eye(SIZE, SIZE, opencv::core::CV_32F)
+        let imat = Mat::eye(SIZE, SIZE, cv::core::CV_32F)
             .unwrap()
             .to_mat()
             .unwrap();

@@ -4,11 +4,12 @@
 //! is a transformation that describes the homography between images. This module provides tools
 //! to compute the homography matrix of an image based on a target image.
 
-use opencv::core::{Mat, TermCriteria};
-use opencv::imgproc;
-use opencv::video;
-
-use crate::Result;
+use medo_core::cv;
+use medo_core::cv::core::{Mat, TermCriteria};
+use medo_core::cv::imgproc;
+use medo_core::cv::video;
+use medo_core::util;
+use medo_core::Result;
 
 /// Homography calculation options.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -54,8 +55,8 @@ impl Calculator {
 
         // Define the termination criteria
         let criteria = TermCriteria {
-            typ: opencv::core::TermCriteria_Type::COUNT as i32
-                | opencv::core::TermCriteria_Type::EPS as i32,
+            typ: cv::core::TermCriteria_Type::COUNT as i32
+                | cv::core::TermCriteria_Type::EPS as i32,
             max_count: opts.iterations as i32,
             epsilon: -1.0,
         };
@@ -69,7 +70,7 @@ impl Calculator {
             // account for 3D effects
             video::MOTION_HOMOGRAPHY,
             criteria,
-            &Mat::default(),
+            &util::DEFAULT_MAT.0,
             5,
         )?;
 

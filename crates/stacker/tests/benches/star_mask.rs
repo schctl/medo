@@ -6,7 +6,7 @@ use medo_stacker_tests::common;
 
 pub fn find_contours(c: &mut Criterion) {
     // Read test image
-    let image = common::read_image("image");
+    let image = common::read_image("image").unwrap();
     // Run benchmark
     c.bench_function("Basic Star Contour Detection", |b| {
         b.iter(|| {
@@ -19,7 +19,7 @@ pub fn find_contours(c: &mut Criterion) {
 
 pub fn star_detection(c: &mut Criterion) {
     // Read test image
-    let image = common::read_image("image");
+    let image = common::read_image("image").unwrap();
     // Run benchmark
     let contour = star::find_contours(&image, Default::default())
         .unwrap()
@@ -33,11 +33,11 @@ pub fn star_detection(c: &mut Criterion) {
 }
 
 pub fn draw_mask(c: &mut Criterion) {
-    use opencv::prelude::MatTraitConst;
-    use opencv::prelude::MatTraitConstManual;
+    use medo_core::cv::prelude::MatTraitConst;
+    use medo_core::cv::prelude::MatTraitConstManual;
 
     // Read test image
-    let image = common::read_image("image");
+    let image = common::read_image("image").unwrap();
     // Run benchmark
     let contours = star::find_contours(&image, Default::default())
         .unwrap()

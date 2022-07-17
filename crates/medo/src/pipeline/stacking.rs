@@ -2,10 +2,9 @@
 
 use std::borrow::Cow;
 
+use medo_core::entry::{Entries, Entry, OwnedEntryIter};
+use medo_core::{Error, Result};
 use medo_stacker::stacker::average::Stacker;
-
-use crate::entry::{Entries, Entry, OwnedEntryIter};
-use crate::{Error, Result};
 
 #[derive(Debug, Clone, Default)]
 pub struct Opts {}
@@ -26,7 +25,7 @@ pub fn process<'scope>(
     tracing::info!("stacking...");
     let stacker = Stacker::new(iter);
     let data = stacker
-        .filter_map(medo_stacker::Result::ok)
+        .filter_map(Result::ok)
         .last()
         .ok_or(Error::PipelineStageFailed)?;
     tracing::info!("done stacking");
