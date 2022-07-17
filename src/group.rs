@@ -21,6 +21,9 @@ pub struct Group {
 impl Group {
     /// Process this group's pipeline.
     pub fn process(&mut self) -> Result<&OwnedEntries> {
+        let span = tracing::info_span!("group", name = %self.name);
+        let _enter = span.enter();
+
         self.pipeline_output = Some(
             self.pipeline
                 .process(self.entries.to_borrow())?

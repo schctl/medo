@@ -19,6 +19,8 @@ fn init_log() {
     let format = tracing_subscriber::fmt::format()
         .without_time()
         .with_thread_names(true);
+    #[cfg(not(debug_assertions))]
+    let format = format.with_target(false);
     tracing_subscriber::fmt()
         .event_format(format)
         .with_max_level(level)

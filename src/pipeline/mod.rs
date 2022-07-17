@@ -7,6 +7,7 @@ pub mod alignment;
 pub mod stacking;
 
 /// A stage in the processing pipeline of a group of entries.
+#[derive(Debug, Clone)]
 pub enum Stage {
     Alignment(alignment::Opts),
     Stacking(stacking::Opts),
@@ -23,7 +24,11 @@ impl Pipeline {
         &self,
         mut input: Entries<'scope, OwnedEntryIter<'scope>>,
     ) -> Result<Entries<'scope, OwnedEntryIter<'scope>>> {
+        let span = tracing::info_span!("pipeline");
+        let _enter = span.enter();
+
         for stage in &self.stages {
+            tracing::info!(?stage, "running...");
             input = match stage {
                 Stage::Alignment(o) => alignment::process(input, o)?,
                 Stage::Stacking(o) => stacking::process(input, o)?,

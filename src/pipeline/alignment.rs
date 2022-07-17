@@ -3,7 +3,8 @@
 use std::borrow::Cow;
 use std::path::PathBuf;
 
-use opencv::core::Mat;
+use opencv::core::{Mat, MatTraitConst, MatTraitConstManual, Scalar};
+use opencv::imgproc;
 use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 
 use medo_stacker::contour;
@@ -14,15 +15,15 @@ use crate::entry::{Entries, Entry, OwnedEntryIter};
 use crate::util;
 use crate::Result;
 
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct Opts {}
 
 pub fn process<'scope>(
     input: Entries<'scope, OwnedEntryIter<'scope>>,
     _opts: &Opts,
 ) -> Result<Entries<'scope, OwnedEntryIter<'scope>>> {
-    use opencv::core::{MatTraitConst, MatTraitConstManual, Scalar};
-    use opencv::imgproc;
+    let span = tracing::info_span!("stage_alignment");
+    let _enter = span.enter();
 
     // // Hash entries
     // let mut hasher = DefaultHasher::new();
@@ -32,18 +33,15 @@ pub fn process<'scope>(
     let construct_out_path = |e: &Entry| -> PathBuf {
         // Get path
         let mut out_path = util::temp_dir();
-        // out_path.push(format!("{:x}", hash));
         out_path.push(e.name().as_ref());
         out_path
     };
 
     // Create alignment calculator
-    tracing::debug!("Preparing reference...");
     let first = input.reference.read_image()?;
     let first_mask = star::find_contours(&first, Default::default())?.collect();
     let first_mask = contour::create_mask(first.size()?, first.typ(), &first_mask)?;
     let calculator = homography::Calculator::new(&first_mask)?;
-    tracing::debug!("Done preparing reference");
 
     // Align images
     let images = input
@@ -51,10 +49,13 @@ pub fn process<'scope>(
         .par_bridge()
         .into_par_iter()
         .map(move |e| {
+            let span = tracing::debug_span!("ps_alignment_unit");
+            let _enter = span.enter();
+
             // Start
             let name = e.name();
             let start = std::time::Instant::now();
-            tracing::info!("Aligning {}...", name);
+            tracing::info!(%name, "aligning...");
             // Read image
             let image = e.read_image()?;
             // Create mask
@@ -77,10 +78,10 @@ pub fn process<'scope>(
             util::write_image(&out_path, &image)?;
             // Done
             tracing::info!(
-                "[{}s] Aligned {} -> {}",
-                start.elapsed().as_secs(),
-                name,
-                out_path.to_string_lossy()
+                %name,
+                output = out_path.to_string_lossy().as_ref(),
+                time = %format!("{}s", start.elapsed().as_secs()),
+                "done aligning",
             );
             Ok(Cow::Owned(Entry::new_path_owned(out_path)?))
         })
