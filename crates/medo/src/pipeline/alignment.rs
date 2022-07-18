@@ -11,7 +11,6 @@ use medo_core::cv::imgproc;
 use medo_core::entry::{Entries, Entry, OwnedEntryIter};
 use medo_core::util;
 use medo_core::Result;
-use medo_stacker::contour;
 use medo_stacker::homography;
 use medo_stacker::star;
 
@@ -25,23 +24,23 @@ pub fn process<'scope>(
     let span = tracing::info_span!("stage_alignment");
     let _enter = span.enter();
 
-    // // Hash entries
-    // let mut hasher = DefaultHasher::new();
-    // self.entries.hash(&mut hasher);
-    // let hash = hasher.finish();
-
-    let construct_out_path = |e: &Entry| -> PathBuf {
+    let construct_out_path = |name: &str| -> PathBuf {
         // Get path
         let mut out_path = util::temp_dir();
-        out_path.push(e.name().as_ref());
+        out_path.push(name);
         out_path
     };
 
     // Create alignment calculator
     let first = input.reference.read_image()?;
-    let first_mask = star::find_contours(&first, Default::default())?.collect();
-    let first_mask = contour::create_mask(first.size()?, first.typ(), &first_mask)?;
+    let first_stars = star::find_contours(&first, Default::default())?;
+    let first_mask = star::create_mask(first.size()?, first.typ(), first_stars)?;
     let calculator = homography::Calculator::new(&first_mask)?;
+
+    // TODO: reliably find pre-aligned image
+    // An alignment result is related to two imaages: the image itself
+    // and the reference. Find some way to reliably hash both in case that
+    // there is no absolute path to hash.
 
     // Align images
     let images = input
@@ -59,8 +58,8 @@ pub fn process<'scope>(
             // Read image
             let image = e.read_image()?;
             // Create mask
-            let mask = star::find_contours(&image, Default::default())?.collect();
-            let mask = contour::create_mask(image.size()?, image.typ(), &mask)?;
+            let stars = star::find_contours(&image, Default::default())?;
+            let mask = star::create_mask(image.size()?, image.typ(), stars)?;
             // Align
             let warp = calculator.calculate(&mask, Default::default())?;
             let mut dst = Mat::default();
@@ -74,8 +73,8 @@ pub fn process<'scope>(
                 Scalar::default(),
             )?;
             // Write
-            let out_path = construct_out_path(&e);
-            util::write_image(&out_path, &image)?;
+            let out_path = construct_out_path(&name);
+            util::write_image(&out_path, &dst)?;
             // Done
             tracing::info!(
                 %name,

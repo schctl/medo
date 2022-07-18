@@ -27,6 +27,9 @@ impl Pipeline {
         let span = tracing::info_span!("pipeline");
         let _enter = span.enter();
 
+        // A pipeline stage needs to output an `Entry`. We let each stage
+        // decide if holding the image in memory, or writing it to disk
+        // is more efficient.
         for stage in &self.stages {
             tracing::info!(?stage, "running...");
             input = match stage {

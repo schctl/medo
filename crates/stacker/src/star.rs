@@ -1,15 +1,8 @@
 //! Tools to detect stars in an image and create a mask.
 
-use medo_core::cv::core::{Mat, Point, Point2f, Vector};
+use medo_core::cv::core::{Mat, Point, Point_, Scalar, Size, Vector};
 use medo_core::cv::imgproc;
 use medo_core::Result;
-
-use crate::contour::Contour;
-
-/// Get the area of a circle.
-fn area_of_circle(radius: f32) -> f32 {
-    std::f32::consts::PI * radius.powi(2)
-}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DetectionOpts {
@@ -23,31 +16,47 @@ impl Default for DetectionOpts {
     fn default() -> Self {
         Self {
             max_area: 2500.0,
-            max_eccentricity: 0.5,
+            max_eccentricity: 0.4,
         }
     }
 }
 
+/// A circle used to describe a star in an image.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Circle {
+    pub radius: f32,
+    pub center: Point_<f32>,
+}
+
+impl Circle {
+    pub fn area(&self) -> f32 {
+        std::f32::consts::PI * self.radius.powi(2)
+    }
+}
+
+type Contour = Vector<Point_<i32>>;
+
 /// Check if a contour resembles a star.
-pub fn is_contour_a_star(cnt: &Contour, opts: DetectionOpts) -> Result<bool> {
+pub fn map_contour(cnt: &Contour, opts: DetectionOpts) -> Result<Option<Circle>> {
     let area = imgproc::contour_area(&cnt, false)? as f32;
 
     // Reject if contour is too large
     if area > opts.max_area {
-        return Ok(false);
+        return Ok(None);
     }
 
-    // Reject if the contour area is similar to the minimum enclosing circle
+    // Reject if the contour area is not similar to the minimum enclosing circle
     let mut radius = 0.0;
-    let mut center = Point2f::new(0.0, 0.0);
+    let mut center = Point_::new(0.0, 0.0);
     imgproc::min_enclosing_circle(&cnt, &mut center, &mut radius)?;
+    let circle = Circle { radius, center };
 
-    let circle = area_of_circle(radius);
-    if (area - circle).abs() > (opts.max_eccentricity * circle) {
-        return Ok(false);
+    let circle_area = circle.area();
+    if (area - circle_area).abs() > (opts.max_eccentricity * circle_area) {
+        return Ok(None);
     }
 
-    Ok(true)
+    Ok(Some(circle))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -58,14 +67,17 @@ pub struct ContourDetectionOpts {
     pub threshold_brightness: f32,
     /// Maximum brightness.
     pub max_brightness: f32,
+    /// Blur to apply before masking.
+    pub blur_amount: i32,
 }
 
 impl Default for ContourDetectionOpts {
     fn default() -> Self {
         Self {
             star_detection: Default::default(),
-            threshold_brightness: 144.0,
+            threshold_brightness: 127.0,
             max_brightness: 255.0,
+            blur_amount: 3,
         }
     }
 }
@@ -74,15 +86,15 @@ impl Default for ContourDetectionOpts {
 pub fn find_contours(
     img: &Mat,
     opts: ContourDetectionOpts,
-) -> Result<impl Iterator<Item = Contour>> {
+) -> Result<impl Iterator<Item = Circle>> {
     // Convert image to grayscale, blur and threshold
     let mut img_gray = Mat::default();
     imgproc::cvt_color(&img, &mut img_gray, imgproc::COLOR_BGR2GRAY, 0)?;
-    // let mut img_blur = Mat::default();
-    // imgproc::median_blur(&img_gray, &mut img_blur, 5)?;
+    let mut img_blur = Mat::default();
+    imgproc::median_blur(&img_gray, &mut img_blur, opts.blur_amount)?;
     let mut img_thresh = Mat::default();
     imgproc::threshold(
-        &img_gray,
+        &img_blur,
         &mut img_thresh,
         opts.threshold_brightness as f64,
         opts.max_brightness as f64,
@@ -99,9 +111,32 @@ pub fn find_contours(
         Point::default(),
     )?;
 
-    Ok(contours.into_iter().filter_map(move |s| {
-        is_contour_a_star(&s, opts.star_detection)
-            .ok()
-            .and_then(|o| o.then(|| s))
-    }))
+    Ok(contours
+        .into_iter()
+        .filter_map(move |s| map_contour(&s, opts.star_detection).ok().flatten()))
+}
+
+/// Create an image mask from the given stars.
+pub fn create_mask(size: Size, ty: i32, stars: impl Iterator<Item = Circle>) -> Result<Mat> {
+    let mut mask = Mat::new_size_with_default(size, ty, Scalar::new(0.0, 0.0, 0.0, 0.0))?;
+
+    for star in stars {
+        let center = Point_ {
+            x: star.center.x as i32,
+            y: star.center.y as i32,
+        };
+        let radius = star.radius.ceil() as i32;
+
+        imgproc::circle(
+            &mut mask,
+            center,
+            radius,
+            Scalar::new(255.0, 255.0, 255.0, 255.0),
+            -1,
+            imgproc::LINE_8,
+            0,
+        )?;
+    }
+
+    Ok(mask)
 }

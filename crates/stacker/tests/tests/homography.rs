@@ -2,7 +2,6 @@ use medo_core::cv;
 use medo_core::cv::core::{Mat, Size};
 use medo_core::cv::imgproc;
 use medo_core::cv::prelude::{MatExprTraitConst, MatTraitConst, MatTraitConstManual};
-use medo_stacker::contour;
 use medo_stacker::homography;
 use medo_stacker::star;
 use medo_stacker_tests::common;
@@ -25,13 +24,8 @@ fn warp_image(image: &Mat, warp: &Mat, size: Size) -> Mat {
 fn star_mask_image(img: &Mat) -> Mat {
     // Find contours and create mask
     let contours = star::find_contours(&img, Default::default())
-        .unwrap()
-        .collect();
-    let mask = contour::create_mask(img.size().unwrap(), img.typ(), &contours).unwrap();
-    // Apply the mask
-    let mut dst = Mat::default();
-    cv::core::bitwise_and(img, &mask, &mut dst, &cv::core::no_array()).unwrap();
-    dst
+        .unwrap();
+    star::create_mask(img.size().unwrap(), img.typ(), contours).unwrap()
 }
 
 #[test]

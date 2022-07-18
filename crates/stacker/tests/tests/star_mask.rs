@@ -1,5 +1,5 @@
 use medo_core::cv::prelude::{MatTraitConst, MatTraitConstManual};
-use medo_stacker::contour;
+use medo_stacker;
 use medo_stacker::star;
 use medo_stacker_tests::common;
 
@@ -9,9 +9,8 @@ fn create_star_mask() {
     let image = common::read_image("template").unwrap();
     // Find contours and create mask
     let contours = star::find_contours(&image, Default::default())
-        .unwrap()
-        .collect();
-    let mask = contour::create_mask(image.size().unwrap(), image.typ(), &contours).unwrap();
+        .unwrap();
+    let mask = star::create_mask(image.size().unwrap(), image.typ(), contours).unwrap();
     // Write results
     common::write_image("star_mask", &mask).unwrap();
 }
