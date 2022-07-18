@@ -18,15 +18,13 @@ pub fn process<'scope>(
 
     let iter = [input.reference].into_iter().chain(input.entries);
 
-    tracing::info!("stacking...");
     let mut stacker = Stacker::average(iter)?;
     for (n, r) in stacker.by_ref().enumerate() {
         // FIXME: identify image that failed to stack
         if let Err(e) = r {
-            tracing::error!(index = n, "unable to stack an image: {}", e)
+            tracing::error!(index = n, error = %e, "failed to stack entry, discarding")
         }
     }
-    tracing::info!("done stacking");
 
     Ok(Entries {
         reference: Cow::Owned(Entry::new_image(

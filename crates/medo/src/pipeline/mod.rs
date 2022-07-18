@@ -4,6 +4,7 @@ use medo_core::entry::{Entries, OwnedEntryIter};
 use medo_core::Result;
 
 pub mod alignment;
+pub mod sharpen;
 pub mod stacking;
 
 /// A stage in the processing pipeline of a group of entries.
@@ -11,6 +12,19 @@ pub mod stacking;
 pub enum Stage {
     Alignment(alignment::Opts),
     Stacking(stacking::Opts),
+    Sharpen(sharpen::Opts),
+}
+
+impl Stage {
+    /// Get a constant name describing this stage of the pipeline.
+    #[inline]
+    pub const fn name(&self) -> &'static str {
+        match self {
+            Self::Alignment(_) => "alignment",
+            Self::Stacking(_) => "stacking",
+            Self::Sharpen(_) => "sharpen",
+        }
+    }
 }
 
 /// Represents a pipeline of operations on a group of entries.
@@ -31,10 +45,11 @@ impl Pipeline {
         // decide if holding the image in memory, or writing it to disk
         // is more efficient.
         for stage in &self.stages {
-            tracing::info!(?stage, "running...");
+            tracing::info!(stage = %stage.name());
             input = match stage {
                 Stage::Alignment(o) => alignment::process(input, o)?,
                 Stage::Stacking(o) => stacking::process(input, o)?,
+                Stage::Sharpen(o) => sharpen::process(input, o)?,
             }
         }
         Ok(input)

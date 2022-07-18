@@ -21,9 +21,6 @@ pub fn process<'scope>(
     input: Entries<'scope, OwnedEntryIter<'scope>>,
     _opts: &Opts,
 ) -> Result<Entries<'scope, OwnedEntryIter<'scope>>> {
-    let span = tracing::info_span!("stage_alignment");
-    let _enter = span.enter();
-
     let construct_out_path = |name: &str| -> PathBuf {
         // Get path
         let mut out_path = util::temp_dir();
@@ -47,15 +44,14 @@ pub fn process<'scope>(
         .entries
         .par_bridge()
         .into_par_iter()
-        .map(move |e| {
-            let span = tracing::debug_span!("ps_alignment_unit");
+        .map(|e| {
+            let span = tracing::info_span!("stage_alignment");
             let _enter = span.enter();
 
-            // Start
             let name = e.name();
+            tracing::info!(%name); // alignment takes a long time, so info is useful
+            // Start
             let start = std::time::Instant::now();
-            tracing::info!(%name, "aligning...");
-            // Read image
             let image = e.read_image()?;
             // Create mask
             let stars = star::find_contours(&image, Default::default())?;
@@ -80,11 +76,24 @@ pub fn process<'scope>(
                 %name,
                 output = out_path.to_string_lossy().as_ref(),
                 time = %format!("{}s", start.elapsed().as_secs()),
-                "done aligning",
+                "finished",
             );
             Ok(Cow::Owned(Entry::new_path_owned(out_path)?))
         })
-        .collect::<Result<Vec<_>>>()?
+        .filter_map(|o: Result<Cow<Entry>>| {
+            let span = tracing::info_span!("stage_alignment");
+            let _enter = span.enter();
+
+            match o {
+                Ok(o) => Some(o),
+                Err(e) => {
+                    // FIXME: identify image that failed to align
+                    tracing::error!(error = %e, "failed to align entry, discarding");
+                    None
+                }
+            }
+        })
+        .collect::<Vec<_>>()
         .into_iter();
 
     Ok(Entries {

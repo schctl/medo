@@ -23,8 +23,7 @@ fn warp_image(image: &Mat, warp: &Mat, size: Size) -> Mat {
 
 fn star_mask_image(img: &Mat) -> Mat {
     // Find contours and create mask
-    let contours = star::find_contours(&img, Default::default())
-        .unwrap();
+    let contours = star::find_contours(&img, Default::default()).unwrap();
     star::create_mask(img.size().unwrap(), img.typ(), contours).unwrap()
 }
 

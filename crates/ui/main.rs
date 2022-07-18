@@ -46,6 +46,7 @@ fn main() {
     let pipeline = pipeline::Pipeline {
         stages: vec![
             pipeline::Stage::Alignment(Default::default()),
+            pipeline::Stage::Sharpen(Default::default()),
             pipeline::Stage::Stacking(Default::default()),
         ],
     };
