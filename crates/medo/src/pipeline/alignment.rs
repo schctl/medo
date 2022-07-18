@@ -50,7 +50,7 @@ pub fn process<'scope>(
 
             let name = e.name();
             tracing::info!(%name); // alignment takes a long time, so info is useful
-            // Start
+                                   // Start
             let start = std::time::Instant::now();
             let image = e.read_image()?;
             // Create mask

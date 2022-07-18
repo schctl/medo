@@ -9,9 +9,11 @@ pub fn star_detection(c: &mut Criterion) {
     // Run benchmark
     c.bench_function("Basic Star Detection", |b| {
         b.iter(|| {
-            let _contours: Vec<_> = black_box(star::find_contours(&image, Default::default())
-                .unwrap()
-                .collect());
+            let _contours: Vec<_> = black_box(
+                star::find_contours(&image, Default::default())
+                    .unwrap()
+                    .collect(),
+            );
         })
     });
 }

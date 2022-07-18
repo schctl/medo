@@ -1,10 +1,12 @@
 use std::borrow::Cow;
-use std::path::PathBuf;
 
+use clap::Parser;
 use medo::core::entry::{Entries, Entry};
 use medo::core::util;
 use medo::group;
 use medo::pipeline;
+
+mod cli;
 
 fn init_log() {
     #[cfg(debug_assertions)]
@@ -25,18 +27,17 @@ fn init_log() {
 fn main() {
     // Initialization
     init_log();
+
+    let opts = cli::Opts::parse();
+
+    // Init rayon
     rayon::ThreadPoolBuilder::new()
-        .num_threads(4)
+        .num_threads(opts.max_threads)
         .build_global()
         .unwrap();
 
-    // Parse opts
-    let mut args = std::env::args();
-    let src_dir = PathBuf::from(&args.nth(1).unwrap());
-    let out_path = PathBuf::from(&args.next().unwrap());
-
-    // Run app
-    let mut entries = std::fs::read_dir(&src_dir).unwrap().filter_map(|d| {
+    // Run
+    let mut entries = std::fs::read_dir(&opts.input).unwrap().filter_map(|d| {
         d.ok()
             .and_then(|d| Entry::new_path_owned(d.path()).ok().map(Cow::Owned))
     });
@@ -59,5 +60,5 @@ fn main() {
     let out = group.process().unwrap();
 
     // Write result
-    util::write_image(&out_path, out.reference.read_image().unwrap().as_ref()).unwrap();
+    util::write_image(&opts.output, out.reference.read_image().unwrap().as_ref()).unwrap();
 }

@@ -16,6 +16,7 @@ publish = false
 rust-version = "1.61"
 
 [dependencies]
+clap = { version = "3.2", features = ["derive"] }
 medo = { path = "crates/medo" }
 rayon = "1"
 tracing = "0.1"
