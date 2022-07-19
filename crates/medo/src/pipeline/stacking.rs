@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use medo_core::entry::{Entries, Entry, OwnedEntryIter};
+use medo_core::entry::{Entries, OwnedEntryIter};
 use medo_core::Result;
 use medo_stacker::stacker::Stacker;
 
@@ -27,10 +27,7 @@ pub fn process<'scope>(
     }
 
     Ok(Entries {
-        reference: Cow::Owned(Entry::new_image(
-            "Stack Result",
-            stacker.leak().into_image()?,
-        )?),
+        reference: Cow::Owned(stacker.leak()),
         entries: Box::new(std::iter::empty()),
     })
 }

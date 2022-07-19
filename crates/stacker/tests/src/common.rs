@@ -23,5 +23,5 @@ pub fn read_image(name: &str) -> Result<Mat> {
 }
 
 pub fn write_image(name: &str, image: &Mat) -> Result<()> {
-    util::write_image(relative_target(format!("{}", name)), image)
+    util::write_image(relative_target(name), image)
 }

@@ -38,6 +38,7 @@ impl Image {
 
     /// Create a new entry from an image.
     pub fn new_owned(name: String, image: Mat) -> Result<Self> {
+        Self::check_image(&image)?;
         Ok(Self {
             name,
             image: OpaqueMat(image),
@@ -52,7 +53,26 @@ impl Image {
 
     /// Get the underlying image.
     #[inline]
-    pub fn image(&self) -> &Mat {
+    pub const fn image(&self) -> &Mat {
         &self.image.0
+    }
+
+    /// Consume self and get the underlying image.
+    #[inline]
+    pub fn into_image(self) -> Mat {
+        self.image.0
+    }
+
+    /// Replace this image with a new one.
+    #[inline]
+    pub fn replace_image(&mut self, image: Mat) -> Result<()> {
+        Self::check_image(&image)?;
+        self.image = OpaqueMat(image);
+        Ok(())
+    }
+
+    #[inline]
+    fn check_image(_: &Mat) -> Result<()> {
+        Ok(())
     }
 }

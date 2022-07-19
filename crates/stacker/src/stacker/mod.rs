@@ -22,13 +22,13 @@ impl<'iter, T: Iterator<Item = Cow<'iter, Entry>>> Stacker<'iter, T> {
     #[inline]
     pub fn leak(self) -> Entry {
         match self {
-            Self::Average(a) => a.leak(),
+            Self::Average(a) => Entry::Image(a.leak()),
         }
     }
 }
 
 impl<'iter, T: Iterator<Item = Cow<'iter, Entry>>> Iterator for Stacker<'iter, T> {
-    type Item = Result<&'iter Entry>;
+    type Item = Result<()>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {

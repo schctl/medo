@@ -83,10 +83,10 @@ impl Entry {
 
     /// Get the image associated with this entry and consume self.
     #[inline]
-    pub fn into_image(self) -> Result<Mat> {
+    pub fn into_image(self) -> Result<Image> {
         match self {
-            Self::Path(p) => Ok(util::read_image(p.path())?),
-            Self::Image(p) => Ok(p.image.0),
+            Self::Path(p) => Ok(Image::new(p.file_name(), util::read_image(p.path())?)?),
+            Self::Image(p) => Ok(p),
         }
     }
 }
