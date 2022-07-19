@@ -16,11 +16,13 @@ use medo_core::Result;
 pub struct CalculateOpts {
     /// Number of iterations of the algorithm.
     pub iterations: usize,
+    /// Accuracy of the algorithm.
+    pub epsilon: f64,
 }
 
 impl Default for CalculateOpts {
     fn default() -> Self {
-        Self { iterations: 100 }
+        Self { iterations: 200, epsilon: 1e-8 }
     }
 }
 
@@ -58,7 +60,7 @@ impl Calculator {
             typ: cv::core::TermCriteria_Type::COUNT as i32
                 | cv::core::TermCriteria_Type::EPS as i32,
             max_count: opts.iterations as i32,
-            epsilon: -1.0,
+            epsilon: opts.epsilon,
         };
 
         // Calculate warp matrix

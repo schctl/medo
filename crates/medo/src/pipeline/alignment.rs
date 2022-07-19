@@ -24,7 +24,7 @@ pub fn process<'scope>(
     let construct_out_path = |name: &str| -> PathBuf {
         // Get path
         let mut out_path = util::temp_dir();
-        out_path.push(name);
+        out_path.push(format!("{}.tif", name));
         out_path
     };
 
@@ -32,6 +32,7 @@ pub fn process<'scope>(
     let first = input.reference.read_image()?;
     let first_stars = star::find_contours(&first, Default::default())?;
     let first_mask = star::create_mask(first.size()?, first.typ(), first_stars)?;
+    let first_size = first.size()?;
     let calculator = homography::Calculator::new(&first_mask)?;
 
     // TODO: reliably find pre-aligned image
@@ -63,7 +64,7 @@ pub fn process<'scope>(
                 image.as_ref(),
                 &mut dst,
                 &warp,
-                image.size().unwrap(),
+                first_size,
                 imgproc::INTER_LINEAR,
                 cv::core::BORDER_CONSTANT,
                 Scalar::default(),
