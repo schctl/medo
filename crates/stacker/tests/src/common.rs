@@ -19,9 +19,9 @@ fn relative_target<P: AsRef<Path>>(path: P) -> String {
 }
 
 pub fn read_image(name: &str) -> Result<Mat> {
-    util::read_image(relative(format!("tests/data/{}.jpg", name)))
+    util::read_image(relative(format!("tests/data/{}", name)))
 }
 
 pub fn write_image(name: &str, image: &Mat) -> Result<()> {
-    util::write_image(relative_target(format!("{}.jpg", name)), image)
+    util::write_image(relative_target(format!("{}", name)), image)
 }

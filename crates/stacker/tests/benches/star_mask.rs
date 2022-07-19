@@ -5,7 +5,7 @@ use medo_stacker_tests::common;
 
 pub fn star_detection(c: &mut Criterion) {
     // Read test image
-    let image = common::read_image("image").unwrap();
+    let image = common::read_image("image.jpg").unwrap();
     // Run benchmark
     c.bench_function("Basic Star Detection", |b| {
         b.iter(|| {

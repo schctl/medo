@@ -30,7 +30,7 @@ fn star_mask_image(img: &Mat) -> Mat {
 #[test]
 fn identical_images_have_no_homography() {
     // Read test image
-    let image = common::read_image("image").unwrap();
+    let image = common::read_image("image.jpg").unwrap();
     // Calculate homography
     let calculator = homography::Calculator::new(&image).unwrap();
     let homography = calculator.calculate(&image, Default::default()).unwrap();
@@ -50,22 +50,22 @@ fn identical_images_have_no_homography() {
 #[test]
 fn find_homography_and_warp() {
     // Read test images
-    let image = common::read_image("image").unwrap();
-    let template = common::read_image("template").unwrap();
+    let image = common::read_image("image.jpg").unwrap();
+    let template = common::read_image("template.jpg").unwrap();
     // Calculate homography
     let calculator = homography::Calculator::new(&template).unwrap();
     let homography = calculator.calculate(&image, Default::default()).unwrap();
     // Warp image using homography
     let warped = warp_image(&image, &homography, template.size().unwrap());
     // Write result
-    common::write_image("ecc", &warped).unwrap();
+    common::write_image("ecc.jpg", &warped).unwrap();
 }
 
 #[test]
 fn find_homography_from_star_mask_and_warp() {
     // Read test images
-    let image = common::read_image("image").unwrap();
-    let template = common::read_image("template").unwrap();
+    let image = common::read_image("image.jpg").unwrap();
+    let template = common::read_image("template.jpg").unwrap();
     // Mask images
     let image = star_mask_image(&image);
     let template = star_mask_image(&template);
@@ -75,5 +75,5 @@ fn find_homography_from_star_mask_and_warp() {
     // Warp image using homography
     let warped = warp_image(&image, &homography, template.size().unwrap());
     // Write result
-    common::write_image("ecc_star_mask", &warped).unwrap();
+    common::write_image("ecc_star_mask.jpg", &warped).unwrap();
 }
